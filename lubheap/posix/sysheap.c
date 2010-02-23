@@ -36,7 +36,9 @@ typedef struct
 } partition_t;
 
 /* partition used for the system heap */
-static partition_t sysMemPartition;
+static partition_t     sysMemPartition;
+static lub_heap_show_e show_mode   = LUB_HEAP_SHOW_LEAKS;
+static const char     *leak_filter = 0;
 
 /* the partition is extended in 128K chunks as needed */
 #define DEFAULT_CHUNK_SIZE (128 * 1024)
@@ -46,6 +48,13 @@ static void *
 sysheap_segment_alloc(size_t required)
 {
     return sbrk(required);
+}
+/*-------------------------------------------------------- */
+void
+sysheap_atexit(void)
+{
+    /* dump the memory leak status */
+    lub_heap_leak_report(show_mode,leak_filter);
 }
 /*-------------------------------------------------------- */
 static void
@@ -73,6 +82,10 @@ sysheap_init_memory(size_t required)
         pthread_mutex_lock(&this->mutex);
         this->heap = lub_heap_create(segment,required);
         pthread_mutex_unlock(&this->mutex);
+
+/*        lub_heap_init("");
+ */
+       atexit(sysheap_atexit);
     }
 }
 /*-------------------------------------------------------- */

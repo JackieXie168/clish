@@ -23,3 +23,13 @@ bin_tclish@TCL_VERSION@_LDADD   = \
     @LUB_LIBS@                    \
     @PTHREAD_LIBS@                \
     @BFD_LIBS@
+
+if LUBHEAP
+  bin_PROGRAMS += bin/lubheap
+  bin_lubheap_SOURCES = bin/lubheap.c
+  bin_lubheap_LDADD = \
+    @LUBHEAP_LIBS@    \
+    @LUB_LIBS@        \
+    @PTHREAD_LIBS@    \
+    @BFD_LIBS@
+endif
