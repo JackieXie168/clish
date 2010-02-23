@@ -48,7 +48,7 @@ void *
 lub_heap_status_t
     lub_heap_cache_bucket_free(lub_heap_cache_bucket_t *instance,
                                 void                    *ptr);
-lub_heap_status_t
+size_t
     lub_heap_cache__get_max_free(lub_heap_cache_t *this);
 
 lub_heap_cache_bucket_t *

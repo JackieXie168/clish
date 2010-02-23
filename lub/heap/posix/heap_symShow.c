@@ -50,6 +50,13 @@ lub_heap_symShow(unsigned address)
     printf(" 0x%08x",address);
 }
 /*--------------------------------------------------------- */
+bool_t
+lub_heap_symMatch(unsigned    address,
+                  const char *substring)
+{
+    return BOOL_TRUE;
+}
+/*--------------------------------------------------------- */
 /*
  * dummy initialisation call
  */
@@ -310,4 +317,4 @@ lub_heap_symMatch(unsigned    address,
     return result;
 }
 /*--------------------------------------------------------- */
-#endif /* HAV_LIBBFD */
+#endif /* HAVE_LIBBFD */

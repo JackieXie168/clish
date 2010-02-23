@@ -3,7 +3,7 @@
 #include "cache.h"
 
 /*--------------------------------------------------------- */
-lub_heap_status_t
+size_t
 lub_heap_cache__get_max_free(lub_heap_cache_t *this)
 {
     size_t size = 0;
@@ -369,7 +369,7 @@ lub_heap_cache_show(lub_heap_cache_t *this)
                stats.alloc_failures);
     }
 
-    printf(" %10"SIZE_FMT"+%10s %10s %10s %10s %10"SIZE_FMT"\n",
+    printf(" %10u %10s %10s %10s %10s %10"SIZE_FMT"\n",
            this->m_max_block_size,
            "-",
            "-",

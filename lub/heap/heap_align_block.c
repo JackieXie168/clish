@@ -96,8 +96,8 @@ lub_heap_align_block(lub_heap_t      *this,
         lub_heap_block_t *new_block;
         lub_heap_tag_t   *new_tail;
         /* find the second occurance of an alignment boundary */
-        unsigned  tmp           = (alignment-1);
-        char     *new_ptr       = (char *)(((unsigned)*ptr + tmp + alignment) & ~tmp);
+        size_t    tmp           = (alignment-1);
+        char     *new_ptr       = (char *)(((size_t)*ptr + tmp + alignment) & ~tmp);
         size_t    leading_bytes = (new_ptr - *ptr);
         size_t    trailing_bytes;
         

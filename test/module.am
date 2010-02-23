@@ -11,24 +11,22 @@ test_bintree_LDADD         = \
      @BFD_LIBS@
 
 if LUBHEAP
-  noinst_PROGRAMS         += \
-    test/heap                \
-    test/mallocTest          \
+  noinst_PROGRAMS           += \
+    test/heap                  \
+    test/mallocTest            \
     test/lubMallocTest
 
   test_heap_SOURCES          = \
     test/heap.c
   test_heap_LDADD            = \
-    liblub.la                \
+    liblub.la                  \
     @BFD_LIBS@
 
   test_mallocTest_CFLAGS     = @RT_CFLAGS@ 
   test_mallocTest_SOURCES    = \
     test/mallocTest.c
   test_mallocTest_LDADD      = \
-    @RT_LIBS@                \
-    liblub.la                \
-    @BFD_LIBS@
+    @RT_LIBS@
 
   test_lubMallocTest_CFLAGS  = @RT_CFLAGS@
   test_lubMallocTest_LDFLAGS = 
@@ -36,9 +34,9 @@ if LUBHEAP
     test/mallocTest.c
 
   test_lubMallocTest_LDADD   = \
-    @RT_LIBS@                \
-    liblubheap.la            \
-    liblub.la                \
+    @RT_LIBS@                  \
+    liblubheap.la              \
+    liblub.la                  \
     @BFD_LIBS@
 endif
 

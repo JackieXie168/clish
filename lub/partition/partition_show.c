@@ -14,8 +14,8 @@ lub_partition_show(lub_partition_t *this,
     if(verbose)
     {
         printf("PARTITION:\n"
-               " %p syspool usage(%d/%d bytes), minimum segment size(%d bytes)\n",
-               this,
+               " %p syspool usage(%"SIZE_FMT"/%"SIZE_FMT" bytes), minimum segment size(%"SIZE_FMT" bytes)\n",
+               (void*)this,
                (this->m_spec.memory_limit - this->m_partition_ceiling),
                this->m_spec.memory_limit,
                this->m_spec.min_segment_size);

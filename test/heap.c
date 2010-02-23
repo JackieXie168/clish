@@ -664,7 +664,7 @@ test_main(unsigned frame_count)
     lub_test_seq_end();
     /*----------------------------------------------------- */
     lub_test_seq_begin(++testseq,"lub_heap_show_leaks()");
-    lub_heap_show_leaks(LUB_HEAP_SHOW_ALL);
+    lub_heap_leak_report(LUB_HEAP_SHOW_ALL,"");
     lub_test_seq_end();
     /*----------------------------------------------------- */
     test_performance();

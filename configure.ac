@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 m4_define([MAJOR_VERSION], 0)
 m4_define([MINOR_VERSION], 7)
-m4_define([MICRO_VERSION], 3)
+m4_define([MICRO_VERSION], 4)
 
 AC_PREREQ(2.59)
 AC_INIT([clish],
@@ -11,15 +11,15 @@ AC_INIT([clish],
         
 AC_CONFIG_AUX_DIR(aux_scripts)
 
-AC_CONFIG_HEADERS([config.h])
-AM_INIT_AUTOMAKE(subdir-objects)
-AM_PROG_CC_C_O
-
 # Checks for programs.
 AC_PROG_CC
 AC_PROG_CXX
 AC_LIBTOOL_WIN32_DLL
 AC_PROG_LIBTOOL
+
+AC_CONFIG_HEADERS([config.h])
+AM_INIT_AUTOMAKE(subdir-objects)
+AM_PROG_CC_C_O
 
 # needed to handle 64-bit architecture
 AC_CHECK_SIZEOF(int)

@@ -1,6 +1,7 @@
 ## Process this file with automake to generate Makefile.in
 lib_LTLIBRARIES         += liblub.la
 liblub_la_SOURCES        =
+liblub_la_LIBADD         = -lpthread
 
 nobase_include_HEADERS  +=  \
     lub/argv.h              \
@@ -13,6 +14,7 @@ nobase_include_HEADERS  +=  \
     lub/heap.h              \
     lub/partition.h         \
     lub/string.h            \
+    lub/size_fmt.h          \
     lub/test.h              \
     lub/types.h
 

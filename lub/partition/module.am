@@ -8,7 +8,9 @@ if LUBHEAP
                         lub/partition/partition_realloc.c               \
                         lub/partition/partition_segment_alloc.c         \
                         lub/partition/partition_show.c                  \
-                        lub/partition/partition_sysalloc.c
+                        lub/partition/partition_sysalloc.c              \
+                        lub/partition/private.h
+
 endif
 
 EXTRA_DIST             +=            \
