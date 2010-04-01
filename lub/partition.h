@@ -45,8 +45,14 @@ _BEGIN_C_DECL
  */
 typedef struct _lub_partition lub_partition_t;
 
+
 /**
- * This type is used to specify any local_ requirements
+ * This type defines a fundamental allocation function which 
+ * can be used to extend the partition as needed.
+ */
+typedef void *lub_partition_sysalloc_fn(size_t required);
+/**
+ * This type is used to specify any local requirements
  */
 typedef struct _lub_partition_spec lub_partition_spec_t;
 struct _lub_partition_spec
@@ -79,6 +85,12 @@ struct _lub_partition_spec
      * for the growth of this partition
      */
      size_t memory_limit;
+    /**
+     * If non-NULL then this pointer references the fundamental memory allocation
+     * function which should be used to extend the partition.
+     * If NULL then the standard 'malloc' function will be used. 
+     */
+     lub_partition_sysalloc_fn *sysalloc;
 };
 
 /**
@@ -221,7 +233,26 @@ void
          */
         size_t new_size
     );
-
+/**
+ * This causes leak detection to be disabled for this partition 
+ */
+void
+    lub_partition_disable_leak_detection(
+        /**
+         * The instance on which to operate
+         */
+        lub_partition_t *instance
+    );
+/**
+ * This causes leak detection to be enabled for this partition
+ */
+void
+    lub_partition_enable_leak_detection(
+        /**
+         * The instance on which to operate
+         */
+        lub_partition_t *instance
+    );
 
 _END_C_DECL
 

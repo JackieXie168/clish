@@ -25,20 +25,15 @@
 #define __USE_XOPEN_EXTENDED /* needed for sbrk() */
 #include <unistd.h>
 
-#include "lub/heap.h"
+#include "lub/partition/posix/private.h"
 
 #define VX_PAGE_SIZE 4096
 
-typedef struct
-{
-    pthread_mutex_t mutex;
-    lub_heap_t     *heap;
-} partition_t;
-
 /* partition used for the system heap */
-static partition_t     sysMemPartition;
-static lub_heap_show_e show_mode   = LUB_HEAP_SHOW_LEAKS;
-static const char     *leak_filter = 0;
+static lub_posix_partition_t sysMemPartition;
+static lub_partition_t      *sys_partition = &sysMemPartition.m_base;
+static lub_heap_show_e       show_mode   = LUB_HEAP_SHOW_LEAKS;
+static const char           *leak_filter = 0;
 
 /* the partition is extended in 128K chunks as needed */
 #define DEFAULT_CHUNK_SIZE (128 * 1024)
@@ -63,25 +58,17 @@ sysheap_init_memory(size_t required)
     static bool_t initialised;
     if(BOOL_FALSE == initialised)
     {
-        partition_t *this = &sysMemPartition;
-        void        *segment;
-    
-        initialised = BOOL_TRUE;
-        /* initialise the semaphore for the partition */
-        pthread_mutex_init(&this->mutex,NULL);
-    
-        if(required < (DEFAULT_CHUNK_SIZE >> 1))
+        lub_partition_spec_t spec = 
         {
-            required = (DEFAULT_CHUNK_SIZE >> 1);
-        }
-        /* double what we asked for */
-        required <<= 1;
-
-        /* create the heap */
-        segment = sysheap_segment_alloc(required);
-        pthread_mutex_lock(&this->mutex);
-        this->heap = lub_heap_create(segment,required);
-        pthread_mutex_unlock(&this->mutex);
+            BOOL_TRUE,            /* use_local_heap       */
+            8192,                 /* max_local_block_size */
+            8,                    /* num_local_max_blocks */
+            1 * 1024 * 1024,      /* min_segment_size     */
+            0,                    /* memory_limit         */
+            sysheap_segment_alloc /* sysalloc             */
+        };  
+        initialised = BOOL_TRUE;
+        lub_posix_partition_init(&sysMemPartition,&spec);
 
 /*        lub_heap_init("");
  */
@@ -89,31 +76,8 @@ sysheap_init_memory(size_t required)
     }
 }
 /*-------------------------------------------------------- */
-static bool_t
-sysheap_extend_memory(size_t required)
-{
-    bool_t       result  = BOOL_FALSE;
-    void        *segment;
-    if(required < (DEFAULT_CHUNK_SIZE >> 1))
-    {
-        required = (DEFAULT_CHUNK_SIZE >> 1);
-    }
-    /* double what we asked for */
-    required <<= 1;
-
-    segment = sysheap_segment_alloc(required);
-    if(segment)
-    {
-        partition_t *this = &sysMemPartition;
-        lub_heap_add_segment(this->heap,segment,required);
-        result = BOOL_TRUE;
-    }
-    return result;
-}
-/*-------------------------------------------------------- */
 static void
-sysheap_check_status(partition_t      *this,
-                     lub_heap_status_t status,
+sysheap_check_status(lub_heap_status_t status,
                      const char       *where,
                      void             *block,
                      size_t            size)
@@ -144,7 +108,7 @@ sysheap_check_status(partition_t      *this,
             case LUB_HEAP_FAILED:
             {
                 fprintf(stderr,"%s: allocation of %lu bytes failed\n",
-                        where,(unsigned long)size);
+                        where,size);
                 break;
             }
             /*------------------------------------------------- */
@@ -178,46 +142,33 @@ cfree(void *ptr)
 void
 free(void *ptr)
 {
-    partition_t      *this   = &sysMemPartition;
     char             *pBlock = ptr;
     lub_heap_status_t status;
 
     sysheap_init_memory(0);
 
-    pthread_mutex_lock(&this->mutex);
-    status = lub_heap_realloc(this->heap,&pBlock,0,LUB_HEAP_ALIGN_NATIVE);
-    pthread_mutex_unlock(&this->mutex);
+    status = lub_partition_realloc(sys_partition,
+                                   &pBlock,
+                                   0,
+                                   LUB_HEAP_ALIGN_NATIVE);
 
-    sysheap_check_status(this,status,"free",pBlock,0);
+    sysheap_check_status(status,"free",pBlock,0);
 }
 /*-------------------------------------------------------- */
 void *
 malloc(size_t nBytes)
 {
-    partition_t      *this   = &sysMemPartition;
     char             *pBlock = NULL;
     lub_heap_status_t status;
     
     sysheap_init_memory(nBytes);
 
-    pthread_mutex_lock(&this->mutex);
-    status = lub_heap_realloc(this->heap,
-                              &pBlock,
-                              nBytes,
-                              LUB_HEAP_ALIGN_NATIVE);
-    if(LUB_HEAP_FAILED == status)
-    {
-        if(sysheap_extend_memory(nBytes))
-        {
-            status = lub_heap_realloc(this->heap,
-                                      &pBlock,
-                                      nBytes,
-                                      LUB_HEAP_ALIGN_NATIVE);
-        }
-    }
-    pthread_mutex_unlock(&this->mutex);
+    status = lub_partition_realloc(sys_partition,
+                                   &pBlock,
+                                   nBytes,
+                                   LUB_HEAP_ALIGN_NATIVE);
 
-    sysheap_check_status(this,status,"malloc",NULL,nBytes);
+    sysheap_check_status(status,"malloc",NULL,nBytes);
 
     return pBlock;
 }
@@ -226,7 +177,6 @@ void *
 memalign(unsigned alignment, 
          unsigned nBytes)
 {
-    partition_t      *this   = &sysMemPartition;
     char             *pBlock = NULL;
     lub_heap_status_t status = LUB_HEAP_OK;
     lub_heap_align_t  align;
@@ -263,24 +213,12 @@ memalign(unsigned alignment,
     }
     if(LUB_HEAP_OK == status)
     {
-        pthread_mutex_lock(&this->mutex);
-        status = lub_heap_realloc(this->heap,
-                                  &pBlock,
-                                  nBytes,
-                                  align);
-        if(LUB_HEAP_FAILED == status)
-        {
-            if(sysheap_extend_memory(nBytes))
-            {
-                status = lub_heap_realloc(this->heap,
-                                          &pBlock,
-                                          nBytes,
-                                          align);
-            }
-        }
-        pthread_mutex_unlock(&this->mutex);
+        status = lub_partition_realloc(sys_partition,
+                                       &pBlock,
+                                       nBytes,
+                                       align);
     }
-    sysheap_check_status(this,status,"memalign",pBlock,nBytes);
+    sysheap_check_status(status,"memalign",pBlock,nBytes);
 
     return (LUB_HEAP_OK == status) ? pBlock : NULL;
 }
@@ -289,30 +227,17 @@ void *
 realloc(void   *old_ptr, 
         size_t  nBytes)
 {
-    partition_t      *this   = &sysMemPartition;
     char             *pBlock = old_ptr;
     lub_heap_status_t status;
 
     sysheap_init_memory(nBytes);
 
-    pthread_mutex_lock(&this->mutex);
-    status = lub_heap_realloc(this->heap,
-                              &pBlock,
-                              nBytes,
-                              LUB_HEAP_ALIGN_NATIVE);
-    if(LUB_HEAP_FAILED == status)
-    {
-        if(sysheap_extend_memory(nBytes))
-        {
-            status = lub_heap_realloc(this->heap,
-                                      &pBlock,
-                                      nBytes,
-                                      LUB_HEAP_ALIGN_NATIVE);
-        }
-    }
-    pthread_mutex_unlock(&this->mutex);
+    status = lub_partition_realloc(sys_partition,
+                                   &pBlock,
+                                   nBytes,
+                                   LUB_HEAP_ALIGN_NATIVE);
 
-    sysheap_check_status(this,status,"realloc",pBlock,nBytes);
+    sysheap_check_status(status,"realloc",pBlock,nBytes);
 
     return (LUB_HEAP_OK == status) ? pBlock : NULL;
 }
@@ -326,18 +251,12 @@ valloc(unsigned size)
 void
 sysheap_suppress_leak_detection(void)
 {
-    partition_t *this = &sysMemPartition;
-    pthread_mutex_lock(&this->mutex);
-    lub_heap_leak_suppress_detection(this->heap);
-    pthread_mutex_unlock(&this->mutex);
+    lub_partition_disable_leak_detection(sys_partition);
 }
 /*-------------------------------------------------------- */
 void
 sysheap_restore_leak_detection(void)
 {
-    partition_t *this = &sysMemPartition;
-    pthread_mutex_lock(&this->mutex);
-    lub_heap_leak_restore_detection(this->heap);
-    pthread_mutex_unlock(&this->mutex);
+    lub_partition_enable_leak_detection(sys_partition);
 }
 /*-------------------------------------------------------- */

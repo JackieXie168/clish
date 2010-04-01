@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <assert.h>
+#include <string.h>
 
 #include "private.h"
 
@@ -30,26 +31,38 @@ lub_partition_t *
 lub_partition_create(const lub_partition_spec_t *spec)
 {
     lub_posix_partition_t *this;
-    this = calloc(sizeof(lub_posix_partition_t),1);
+    lub_partition_sysalloc_fn *alloc_fn = spec->sysalloc;
+    if(!alloc_fn)
+    {
+        alloc_fn = malloc;
+    }
+    this = alloc_fn(sizeof(lub_posix_partition_t));
     if(this)
     {
-        /* initialise the global mutex */
-        if(0 != pthread_mutex_init(&this->m_mutex,0))
-        {
-            perror("pthread_mutex_init() failed!");
-        }
-        
-        /* initialise the local key */
-        if(0 != pthread_key_create(&this->m_key,
-                                   lub_posix_partition_destroy_key))
-        {
-            perror("pthread_key_create() failed!");
-        }
-        
-        /* initialise the base class */
-        lub_partition_init(&this->m_base,spec);
+        lub_posix_partition_init(this,spec);
     }
     return &this->m_base;
+}
+/*-------------------------------------------------------- */
+void
+lub_posix_partition_init(lub_posix_partition_t      *this,
+                         const lub_partition_spec_t *spec)
+{
+    memset(this,sizeof(*this),0);
+    /* initialise the base class */
+    lub_partition_init(&this->m_base,spec);
+    
+    /* initialise the global mutex */
+    if(0 != pthread_mutex_init(&this->m_mutex,0))
+    {
+        perror("pthread_mutex_init() failed!");
+    }
+    /* initialise the local key */
+    if(0 != pthread_key_create(&this->m_key,
+                               lub_posix_partition_destroy_key))
+    {
+        perror("pthread_key_create() failed!");
+    }
 }
 /*-------------------------------------------------------- */
 void

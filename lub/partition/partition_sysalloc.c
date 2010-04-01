@@ -13,7 +13,7 @@ lub_partition_sysalloc(lub_partition_t *this,
     void *result = 0;
     if(required < this->m_partition_ceiling)
     {
-        result = malloc(required);
+        result = this->m_spec.sysalloc(required);
         if(result)
         {
             this->m_partition_ceiling -= required;

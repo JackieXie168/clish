@@ -14,3 +14,7 @@ struct _lub_posix_partition
     pthread_key_t    m_key;
     pthread_mutex_t  m_mutex;
 };
+void
+lub_posix_partition_init(lub_posix_partition_t      *instance,
+                         const lub_partition_spec_t *spec);
+

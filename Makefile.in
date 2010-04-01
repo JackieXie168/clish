@@ -127,6 +127,8 @@ DIST_COMMON = README $(am__configure_deps) $(nobase_include_HEADERS) \
 @LUBHEAP_TRUE@	lub/heap/posix/sysheap_stubs.c \
 @LUBHEAP_TRUE@	lub/partition/partition_check_memory.c \
 @LUBHEAP_TRUE@	lub/partition/partition_destroy_local_heap.c \
+@LUBHEAP_TRUE@	lub/partition/partition_disable_leak_detection.c \
+@LUBHEAP_TRUE@	lub/partition/partition_enable_leak_detection.c \
 @LUBHEAP_TRUE@	lub/partition/partition_extend_memory.c \
 @LUBHEAP_TRUE@	lub/partition/partition_findcreate_local_heap.c \
 @LUBHEAP_TRUE@	lub/partition/partition_fini.c \
@@ -290,6 +292,8 @@ am__liblub_la_SOURCES_DIST = lub/argv/argv__get_arg.c \
 	lub/heap/posix/heap_symShow.c lub/heap/posix/sysheap_stubs.c \
 	lub/partition/partition_check_memory.c \
 	lub/partition/partition_destroy_local_heap.c \
+	lub/partition/partition_disable_leak_detection.c \
+	lub/partition/partition_enable_leak_detection.c \
 	lub/partition/partition_extend_memory.c \
 	lub/partition/partition_findcreate_local_heap.c \
 	lub/partition/partition_fini.c lub/partition/partition_init.c \
@@ -353,6 +357,8 @@ am__liblub_la_SOURCES_DIST = lub/argv/argv__get_arg.c \
 @LUBHEAP_TRUE@	lub/heap/posix/sysheap_stubs.lo \
 @LUBHEAP_TRUE@	lub/partition/partition_check_memory.lo \
 @LUBHEAP_TRUE@	lub/partition/partition_destroy_local_heap.lo \
+@LUBHEAP_TRUE@	lub/partition/partition_disable_leak_detection.lo \
+@LUBHEAP_TRUE@	lub/partition/partition_enable_leak_detection.lo \
 @LUBHEAP_TRUE@	lub/partition/partition_extend_memory.lo \
 @LUBHEAP_TRUE@	lub/partition/partition_findcreate_local_heap.lo \
 @LUBHEAP_TRUE@	lub/partition/partition_fini.lo \
@@ -1339,6 +1345,12 @@ lub/partition/partition_check_memory.lo:  \
 lub/partition/partition_destroy_local_heap.lo:  \
 	lub/partition/$(am__dirstamp) \
 	lub/partition/$(DEPDIR)/$(am__dirstamp)
+lub/partition/partition_disable_leak_detection.lo:  \
+	lub/partition/$(am__dirstamp) \
+	lub/partition/$(DEPDIR)/$(am__dirstamp)
+lub/partition/partition_enable_leak_detection.lo:  \
+	lub/partition/$(am__dirstamp) \
+	lub/partition/$(DEPDIR)/$(am__dirstamp)
 lub/partition/partition_extend_memory.lo:  \
 	lub/partition/$(am__dirstamp) \
 	lub/partition/$(DEPDIR)/$(am__dirstamp)
@@ -1828,6 +1840,10 @@ mostlyclean-compile:
 	-rm -f lub/partition/partition_check_memory.lo
 	-rm -f lub/partition/partition_destroy_local_heap.$(OBJEXT)
 	-rm -f lub/partition/partition_destroy_local_heap.lo
+	-rm -f lub/partition/partition_disable_leak_detection.$(OBJEXT)
+	-rm -f lub/partition/partition_disable_leak_detection.lo
+	-rm -f lub/partition/partition_enable_leak_detection.$(OBJEXT)
+	-rm -f lub/partition/partition_enable_leak_detection.lo
 	-rm -f lub/partition/partition_extend_memory.$(OBJEXT)
 	-rm -f lub/partition/partition_extend_memory.lo
 	-rm -f lub/partition/partition_findcreate_local_heap.$(OBJEXT)
@@ -2027,6 +2043,8 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@lub/heap/posix/$(DEPDIR)/sysheap_stubs.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@lub/partition/$(DEPDIR)/partition_check_memory.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@lub/partition/$(DEPDIR)/partition_destroy_local_heap.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@lub/partition/$(DEPDIR)/partition_disable_leak_detection.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@lub/partition/$(DEPDIR)/partition_enable_leak_detection.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@lub/partition/$(DEPDIR)/partition_extend_memory.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@lub/partition/$(DEPDIR)/partition_findcreate_local_heap.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@lub/partition/$(DEPDIR)/partition_fini.Plo@am__quote@
